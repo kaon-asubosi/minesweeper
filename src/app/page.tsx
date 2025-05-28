@@ -32,13 +32,15 @@ export default function Home() {
   const sampleclickHandler = () => {
     setsampleCounter((sampleCounter + 1) % 15);
   };
-  const clickHandler = (y: number, x: number) => {};
+  const clickHandler = (y: number, x: number) => {
+    console.log(y, x);
+  };
 
   const bomchecker = (input: number[], bomd: number[], size: number[]) => {};
 
-  const setboard = () => {
-    const calcboard: number[][] = Array.from({ length: boardsize[0] }, () =>
-      new Array<number>(boardsize[1]).fill(-1),
+  const board = (size: number[]) => {
+    const calcboard: number[][] = Array.from({ length: size[0] }, () =>
+      new Array<number>(size[1]).fill(-1),
     );
     return calcboard;
   };
@@ -49,11 +51,11 @@ export default function Home() {
         className={styles.board}
         style={{ width: `${boardsize[0] * 30}px`, height: `${boardsize[1] * 30}` }}
       >
-        {setboard().map((row, x) =>
-          row.map((i, y) => (
+        {board(boardsize).map((row, y) =>
+          row.map((i, x) => (
             <button
-              key={'${x}-${y}'}
-              onClick={() => sampleclickHandler()}
+              key={'${y}-${x}'}
+              onClick={() => clickHandler(y, x)}
               className={styles.sampleCell}
               style={{ backgroundPosition: `${-30 * i}px` }}
             />
