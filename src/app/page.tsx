@@ -21,7 +21,7 @@ export default function Home() {
 
   const [calcTime, setTime] = useState([]);
 
-  const [level, setLevel] = useState();
+  const [level, setLevel] = useState<string>();
 
   const [boardSize, setBoardSize] = useState([9, 9]);
 
@@ -31,6 +31,22 @@ export default function Home() {
 
   const sampleClickHandler = () => {
     setSampleCounter((sampleCounter + 1) % 15);
+  };
+
+  const setBoardLevel = (level: number) => {
+    ///レベルを選択した時に起動する関数、ボードサイズを決め、セットインプットリストも起動する
+    if (level === 0) {
+      setLevel('easy');
+      setBoardSize([9, 9]);
+    } else if (level === 1) {
+      setLevel('normal');
+      setBoardSize([16, 16]);
+    } else if (level === 2) {
+      setLevel('hard');
+      setBoardSize([30, 16]);
+    } else if (level === 3) {
+      setLevel('custom');
+    }
   };
 
   const setInputList = () => {
@@ -59,6 +75,10 @@ export default function Home() {
 
   return (
     <div className={styles.container}>
+      <button onClick={() => setBoardLevel(0)}>初級</button>
+      <button onClick={() => setBoardLevel(1)}>中級</button>
+      <button onClick={() => setBoardLevel(2)}>上級</button>
+      <button onClick={() => setBoardLevel(3)}>カスタム</button>
       <div
         className={styles.board}
         style={{ width: `${boardSize[0] * 30}px`, height: `${boardSize[1] * 30}px` }}
