@@ -35,21 +35,24 @@ export default function Home() {
 
   const setBoardLevel = (level: number) => {
     ///レベルを選択した時に起動する関数、ボードサイズを決め、セットインプットリストも起動する
+    let Size: number[] = [];
     if (level === 0) {
       setLevel('easy');
-      setBoardSize([9, 9]);
+      Size = [9, 9];
     } else if (level === 1) {
       setLevel('normal');
-      setBoardSize([16, 16]);
+      Size = [16, 16];
     } else if (level === 2) {
       setLevel('hard');
-      setBoardSize([30, 16]);
+      Size = [16, 30];
     } else if (level === 3) {
       setLevel('custom');
     }
+    setBoardSize(Size);
+    setInputList(Size);
   };
 
-  const setInputList = () => {
+  const setInputList = (size: number[]) => {
     ///インプットリストをボードサイズに基づいて決定する
     const inputList: number[][] = Array.from({ length: boardSize[0] }, () =>
       new Array<number>(boardSize[1]).fill(0),
@@ -81,7 +84,7 @@ export default function Home() {
       <button onClick={() => setBoardLevel(3)}>カスタム</button>
       <div
         className={styles.board}
-        style={{ width: `${boardSize[0] * 30}px`, height: `${boardSize[1] * 30}px` }}
+        style={{ width: `${boardSize[1] * 30}px`, height: `${boardSize[0] * 30}px` }}
       >
         {board(boardSize).map((row, y) =>
           row.map((i, x) => (
