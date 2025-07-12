@@ -1,59 +1,79 @@
 'use client';
 
+import { useState } from 'react';
 import styles from './page.module.css';
 
 export default function Home() {
+  const directions = [
+    [-1, -1],
+    [-1, 0],
+    [-1, 1],
+    [0, -1],
+    [0, 1],
+    [1, -1],
+    [1, 0],
+    [1, 1],
+  ];
+
+  const [userInput, setUserInput] = useState<number[][]>([]);
+
+  const [bombsMap, setBombsMap] = useState([]);
+
+  const [calcTime, setTime] = useState([]);
+
+  const [level, setLevel] = useState();
+
+  const [boardSize, setBoardSize] = useState([9, 9]);
+
+  const [bombsNumber, setBombsNumber] = useState([]);
+
+  const [sampleCounter, setSampleCounter] = useState(0);
+
+  const sampleClickHandler = () => {
+    setSampleCounter((sampleCounter + 1) % 15);
+  };
+
+  const setInputList = () => {
+    ///インプットリストをボードサイズに基づいて決定する
+    const inputList: number[][] = Array.from({ length: boardSize[0] }, () =>
+      new Array<number>(boardSize[1]).fill(0),
+    );
+    setUserInput(inputList);
+  };
+
+  const clickHandler = (y: number, x: number) => {
+    console.log(y, x);
+  };
+
+  const bombChecke = (input: number[], bomb: number[], size: number[]) => {};
+
+  const bombSearch = (input: number[], bomb: number[], size: number[]) => {};
+
+  const board = (size: number[]) => {
+    const calcBoard: number[][] = Array.from({ length: size[0] }, () =>
+      new Array<number>(size[1]).fill(-1),
+    );
+    calcBoard[0][0] = 0;
+    return calcBoard;
+  };
+
   return (
     <div className={styles.container}>
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code} style={{ backgroundColor: '#fafafa' }}>
-            src/app/page.tsx
-          </code>
-        </p>
-
-        <div className={styles.grid}>
-          <a className={styles.card} href="https://nextjs.org/docs">
-            <h2>Documentation &rarr;</h2>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a className={styles.card} href="https://nextjs.org/learn">
-            <h2>Learn &rarr;</h2>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a className={styles.card} href="https://github.com/vercel/next.js/tree/master/examples">
-            <h2>Examples &rarr;</h2>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            className={styles.card}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          >
-            <h2>Deploy &rarr;</h2>
-            <p>Instantly deploy your Next.js site to a public URL with Vercel.</p>
-          </a>
-        </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <span className={styles.logo}>
-            <img src="vercel.svg" alt="Vercel Logo" width={72} height={16} />
-          </span>
-        </a>
-      </footer>
+      <div
+        className={styles.board}
+        style={{ width: `${boardSize[0] * 30}px`, height: `${boardSize[1] * 30}px` }}
+      >
+        {board(boardSize).map((row, y) =>
+          row.map((i, x) => (
+            <button
+              key={`${y}-${x}`}
+              onClick={() => clickHandler(y, x)}
+              className={styles.sampleCell}
+              style={{ backgroundPosition: `${-30 * i}px` }}
+            />
+          )),
+        )}
+      </div>
     </div>
   );
 }
