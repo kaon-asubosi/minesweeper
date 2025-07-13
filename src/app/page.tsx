@@ -85,12 +85,42 @@ export default function Home() {
     return map;
   };
 
+  const handleRightClick = (e: React.MouseEvent, y: number, x: number) => {
+    e.preventDefault();
+
+    if (isGameOver(userInput, bombsMap)) {
+      console.warn('ゲームオーバー状態なので右クリック無効');
+      return;
+    }
+    const temp = structuredClone(userInput);
+    const display = board(userInput, bombsMap);
+    if (display[y][x] !== -2 && display[y][x] !== 9 && display[y][x] !== 8) return;
+    if (temp[y][x] === 1) return;
+
+    if (temp[y][x] === 0) {
+      temp[y][x] = 9;
+    } else if (temp[y][x] === 9) {
+      temp[y][x] = 8;
+    } else if (temp[y][x] === 8) {
+      temp[y][x] = 0;
+    }
+    setUserInput(temp);
+  };
+
   const clickHandler = (y: number, x: number) => {
+    if (isGameOver(userInput, bombsMap)) {
+      console.log('ゲームオーバー状態なのでクリック無効');
+      return;
+    }
     const oneTimeInput = structuredClone(userInput);
     ///まず爆弾被りのチェック、被っていたらゲームオーバー、被ってないならbombSearch起動して全部終わったら格納
     ///初回チェック
     if (!userInput[y] || userInput[y][x] === undefined) {
       console.warn('クリック範囲外です');
+      return;
+    }
+    if (userInput[y][x] === 9) {
+      console.log('フラッグのある場所はクリックできません');
       return;
     }
     if (!userInput.flat().includes(1)) {
@@ -181,14 +211,43 @@ export default function Home() {
     return result;
   };
 
+  const isGameOver = (input: number[][], bombs: number[][]): boolean => {
+    return input.some((row, y) => row.some((cell, x) => cell === 1 && bombs[y]?.[x] === 1));
+  };
+
   const board = (input: number[][], bombs: number[][]) => {
-    const setting: number[][] = Array.from({ length: boardSize[0] }, () =>
-      new Array<number>(boardSize[1]).fill(-2),
+    const rows = boardSize[0];
+    const cols = boardSize[1];
+    if (input.length !== rows || input[0]?.length !== cols) {
+      return Array.from({ length: rows }, () => new Array<number>(cols).fill(-1));
+    }
+
+    const setting: number[][] = Array.from({ length: rows }, () =>
+      new Array<number>(cols).fill(-2),
     );
-    console.log('セッティング', setting);
-    const calcBoard = fullSearch(input, setting, bombs);
-    console.log('カルクボード', calcBoard);
-    return calcBoard;
+
+    const rawBoard = fullSearch(input, setting, bombs);
+
+    const GameOver = input.some((row, y) => row.some((cell, x) => cell === 1 && bombs[y][x] === 1));
+
+    const displayBoard: number[][] = rawBoard.map((row, y) =>
+      row.map((cell, x) => {
+        const inputState = input[y][x];
+
+        if (GameOver) {
+          if (bombs[y][x] === 1) return 10;
+          if (inputState === 9) {
+            return 9;
+          }
+          return cell;
+        }
+        if (inputState === 9) return 9;
+        if (inputState === 8) return 8;
+        if (cell !== -2) return cell;
+        return -2;
+      }),
+    );
+    return displayBoard;
   };
 
   return (
@@ -206,6 +265,7 @@ export default function Home() {
             <button
               key={`${y}-${x}`}
               onClick={() => clickHandler(y, x)}
+              onContextMenu={(e) => handleRightClick(e, y, x)}
               className={styles.sampleCell}
               style={{ backgroundPosition: `${-30 * i}px` }}
             />
