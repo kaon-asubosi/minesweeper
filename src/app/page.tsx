@@ -29,10 +29,6 @@ export default function Home() {
 
   const [sampleCounter, setSampleCounter] = useState(0);
 
-  const sampleClickHandler = () => {
-    setSampleCounter((sampleCounter + 1) % 15);
-  };
-
   const setBoardLevel = (level: number) => {
     ///レベルを選択した時に起動する関数、ボードサイズを決め、セットインプットリストも起動する
     let Size: number[] = [];
@@ -131,21 +127,20 @@ export default function Home() {
 
       const tempInput = structuredClone(userInput);
       tempInput[y][x] = 1;
+
       setUserInput(tempInput);
+      console.log('ボムマップ', bombsMap);
       return;
     }
     ///2回目以降なのでクリックチェックの後通常CheckAround
     const tempInput = structuredClone(userInput);
     tempInput[y][x] = 1;
     setUserInput(tempInput);
-    console.log(y, x);
+    if (isGameClear(tempInput, bombsMap)) {
+      alert('クリア');
+    }
     return;
   };
-
-  const bombChecke = (input: number[]) => {
-    ///2回目以降の処理爆弾と被っていないかを確認する
-  };
-  ///爆弾とクリックが被ってるかのチェック、初回（inputに1が無い時）だけ爆弾を生成する機能を持つ爆弾生成後は一回目は素通しする
 
   const CheckAround = (input: number[], bombmap: number[][]) => {
     ///周囲に爆弾があるかのチェックをする、周囲にある爆弾の数を返り値にする
@@ -204,7 +199,6 @@ export default function Home() {
   ): number[][] => {
     const ones = findOnes(InputList, 1);
     let result = explored.map((row) => [...row]);
-    console.log(ones);
     for (const [y, x] of ones) {
       result = bombSearch([y, x], bombmap, result);
     }
@@ -213,6 +207,25 @@ export default function Home() {
 
   const isGameOver = (input: number[][], bombs: number[][]): boolean => {
     return input.some((row, y) => row.some((cell, x) => cell === 1 && bombs[y]?.[x] === 1));
+  };
+
+  const isGameClear = (input: number[][], bombs: number[][]): boolean => {
+    const rows = input.length;
+    const cols = input[0]?.length || 0;
+    const boardData = board(input, bombs);
+    console.log('ボードデータ', boardData);
+
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < cols; x++) {
+        const isBomb = bombs[y][x] === 1;
+        const isOpen = boardData[y][x] >= -1 && boardData[y][x] <= 7;
+        if (!isBomb && !isOpen) {
+          return false;
+        }
+      }
+    }
+    console.log('ゲームクリア');
+    return true;
   };
 
   const board = (input: number[][], bombs: number[][]) => {
@@ -241,9 +254,10 @@ export default function Home() {
           }
           return cell;
         }
+        if (cell !== -2) return cell;
         if (inputState === 9) return 9;
         if (inputState === 8) return 8;
-        if (cell !== -2) return cell;
+
         return -2;
       }),
     );
