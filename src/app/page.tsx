@@ -97,31 +97,64 @@ export default function Home() {
     return count;
   };
 
-  const bombSearch = (input: number[], bombmap: number[][], explored: number[][]) => {
+  const bombSearch = (input: [number, number], bombmap: number[][], explored: number[][]) => {
     ///自身から召喚される、周囲の爆弾を確認する機能と、周囲に無かった場合周りの8コマに自分を適応する機能を持つ
     ///探索済みリストを使う、探索済みリスト受け取って探索に行き、探索済みリストを返す
+    const [y, x] = input;
+    const rows = boardSize[0];
+    const cols = boardSize[1];
+    ///2が未探索を意味するので、未探索でない場合終了する処理
+    if (y < 0 || y >= rows || x < 0 || x >= cols || explored[y][x] !== 2) {
+      return explored;
+    }
     const inNumber: number = CheckAround(input, bombmap);
     let result: number[][] = explored.map((row) => [...row]);
     ///-1が0,0が1を表すため-1
-    result[input[0]][input[1]] = inNumber - 1;
+    result[y][x] = inNumber - 1;
     if (inNumber === 0) {
       for (const direction of directions) {
         const dy = direction[0] + input[0];
         const dx = direction[1] + input[1];
-        if (result[dy] !== undefined && result[dy][dx] !== undefined && result[dy][dx] === -2)
-          ///枠外にズレていないかのチェックと既に探索しているかのチェックをここに挿入
-          result = bombSearch([dy, dx], bombmap, result).map((row) => [...row]);
+        result = bombSearch([dy, dx], bombmap, result);
       }
       ///0確認時拡散処理
     }
     return result;
   };
 
-  const board = (size: number[]) => {
-    const calcBoard: number[][] = Array.from({ length: size[0] }, () =>
-      new Array<number>(size[1]).fill(-2),
+  const findOnes = (grid: number[][], search: number): [number, number][] => {
+    const result: [number, number][] = [];
+    for (let y = 0; y < grid.length; y++) {
+      for (let x = 0; x < grid[0].length; x++) {
+        if (grid[y][x] === search) {
+          result.push([y, x]);
+        }
+      }
+    }
+    return result;
+  };
+
+  const fullSearch = (
+    InputList: number[][],
+    explored: number[][],
+    bombmap: number[][],
+  ): number[][] => {
+    const ones = findOnes(InputList, 1);
+    let result = explored.map((row) => [...row]);
+    console.log(ones);
+    for (const [y, x] of ones) {
+      result = bombSearch([y, x], bombmap, result);
+    }
+    return result;
+  };
+
+  const board = (input: number[][], bombs: number[][]) => {
+    const setting: number[][] = Array.from({ length: boardSize[0] }, () =>
+      new Array<number>(boardSize[1]).fill(-2),
     );
-    calcBoard[0][0] = 0;
+    console.log('セッティング', setting);
+    const calcBoard = fullSearch(input, setting, bombs);
+    console.log('カルクボード', calcBoard);
     return calcBoard;
   };
 
@@ -135,7 +168,7 @@ export default function Home() {
         className={styles.board}
         style={{ width: `${boardSize[1] * 30}px`, height: `${boardSize[0] * 30}px` }}
       >
-        {board(boardSize).map((row, y) =>
+        {board(userInput, bombsMap).map((row, y) =>
           row.map((i, x) => (
             <button
               key={`${y}-${x}`}
