@@ -17,7 +17,7 @@ export default function Home() {
 
   const [userInput, setUserInput] = useState<number[][]>([]);
 
-  const [bombsMap, setBombsMap] = useState([]);
+  const [bombsMap, setBombsMap] = useState<number[][]>([]);
 
   const [calcTime, setTime] = useState([]);
 
@@ -59,24 +59,57 @@ export default function Home() {
 
   const setInputList = (size: number[]) => {
     ///インプットリストをボードサイズに基づいて決定する
-    const inputList: number[][] = Array.from({ length: boardSize[0] }, () =>
-      new Array<number>(boardSize[1]).fill(0),
+    const inputList: number[][] = Array.from({ length: size[0] }, () =>
+      new Array<number>(size[1]).fill(0),
     );
     setUserInput(inputList);
+  };
+
+  const generateBombMap = (
+    rows: number,
+    cols: number,
+    count: number,
+    avoid: [number, number],
+  ): number[][] => {
+    const [ay, ax] = avoid;
+    const map: number[][] = Array.from({ length: rows }, () => new Array<number>(cols).fill(0));
+    let placed = 0;
+    while (placed < count) {
+      const y = Math.floor(Math.random() * rows);
+      const x = Math.floor(Math.random() * cols);
+      if ((y !== ay || x !== ax) && map[y][x] === 0) {
+        map[y][x] = 1;
+        placed++;
+      }
+    }
+    return map;
   };
 
   const clickHandler = (y: number, x: number) => {
     const oneTimeInput = structuredClone(userInput);
     ///まず爆弾被りのチェック、被っていたらゲームオーバー、被ってないならbombSearch起動して全部終わったら格納
     ///初回チェック
-    if (userInput.flat().includes(1)) {
-      ///1が含まれていないので初回爆弾生成後爆弾ボード所有CheckAround
-    } else {
-      ///2回目以降なのでクリックチェックの後通常CheckAround
-      bombChecke([y, x]);
-      console.log(y, x);
-      return true;
+    if (!userInput[y] || userInput[y][x] === undefined) {
+      console.warn('クリック範囲外です');
+      return;
     }
+    if (!userInput.flat().includes(1)) {
+      ///1が含まれていないので初回爆弾生成後爆弾ボード所有CheckAround
+      const [rows, cols] = boardSize;
+      const generated = generateBombMap(rows, cols, bombsNumber, [y, x]);
+      setBombsMap(generated);
+
+      const tempInput = structuredClone(userInput);
+      tempInput[y][x] = 1;
+      setUserInput(tempInput);
+      return;
+    }
+    ///2回目以降なのでクリックチェックの後通常CheckAround
+    const tempInput = structuredClone(userInput);
+    tempInput[y][x] = 1;
+    setUserInput(tempInput);
+    console.log(y, x);
+    return;
   };
 
   const bombChecke = (input: number[]) => {
@@ -90,7 +123,7 @@ export default function Home() {
     for (const direction of directions) {
       const dy = direction[0] + input[0];
       const dx = direction[1] + input[1];
-      if (bombsMap[dy] !== undefined && bombsMap[dy][dx] !== undefined && bombsMap[dy][dx] === 1) {
+      if (bombmap[dy] !== undefined && bombmap[dy][dx] !== undefined && bombmap[dy][dx] === 1) {
         count += 1;
       }
     }
@@ -104,7 +137,7 @@ export default function Home() {
     const rows = boardSize[0];
     const cols = boardSize[1];
     ///2が未探索を意味するので、未探索でない場合終了する処理
-    if (y < 0 || y >= rows || x < 0 || x >= cols || explored[y][x] !== 2) {
+    if (y < 0 || y >= rows || x < 0 || x >= cols || explored[y][x] !== -2) {
       return explored;
     }
     const inNumber: number = CheckAround(input, bombmap);
