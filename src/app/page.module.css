@@ -8,13 +8,55 @@
   padding: 0 0.5rem;
 }
 
-.sampleCell {
+.cell {
+  box-sizing: border-box;
   width: 30px;
   height: 30px;
+  font-size: 18px;
+  font-weight: bold;
+  line-height: 30px;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
   background: url('~/src/assets/images/image.png') no-repeat;
-  background-color: #c6c6c6;
+  background-color: #ccc;
+  background-size: auto; /* 適宜調整 */
+  border: 1px solid #888;
 }
 
+.cellOpened {
+  background-color: #ddd;
+  border: 1px solid #999;
+  box-shadow: none;
+}
+
+.cellUnopend {
+  background-color: #eee;
+  box-shadow:
+    inset -2px -2px 2px #fff,
+    inset 2px 2px 2px #aaa;
+}
+
+/* 数字・爆弾などを表すコンテンツ表示 */
+.cellContent {
+  background-color: #d1d1d1;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  border: 1px solid #999;
+}
+
+/* フラッグ */
+.cellFlag {
+  background-position: -270px 0; /* 例：画像スプライトで位置指定 */
+}
+
+/* クエスチョンマーク */
+.cellQuestion {
+  background-position: -240px 0; /* 例：画像スプライトで位置指定 */
+}
+
+/* ゲームボード */
 .board {
   display: flex;
   flex-wrap: wrap;

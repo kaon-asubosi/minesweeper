@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styles from './page.module.css';
 
 export default function Home() {
@@ -19,7 +19,7 @@ export default function Home() {
 
   const [bombsMap, setBombsMap] = useState<number[][]>([]);
 
-  const [calcTime, setTime] = useState([]);
+  const [calcTime, setTime] = useState<number | null>(null);
 
   const [level, setLevel] = useState<string>();
 
@@ -28,6 +28,23 @@ export default function Home() {
   const [bombsNumber, setBombsNumber] = useState(10);
 
   const [sampleCounter, setSampleCounter] = useState(0);
+
+  useEffect(() => {
+    const hasStarted = userInput.flat().includes(1);
+    const gameEnded = isGameOver(userInput, bombsMap) || isGameClear(userInput, bombsMap);
+
+    let timer: NodeJS.Timeout | null = null;
+
+    if (hasStarted && !gameEnded) {
+      timer = setInterval(() => {
+        setSampleCounter((prev) => prev + 1);
+      }, 1000);
+    }
+
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [userInput, bombsMap]);
 
   const setBoardLevel = (level: number) => {
     ///レベルを選択した時に起動する関数、ボードサイズを決め、セットインプットリストも起動する
@@ -210,6 +227,9 @@ export default function Home() {
   };
 
   const isGameClear = (input: number[][], bombs: number[][]): boolean => {
+    if (!input.length || !input[0]?.length) return false;
+    if (!bombs.length || !bombs[0]?.length) return false;
+
     const rows = input.length;
     const cols = input[0]?.length || 0;
     const boardData = board(input, bombs);
@@ -224,7 +244,6 @@ export default function Home() {
         }
       }
     }
-    console.log('ゲームクリア');
     return true;
   };
 
@@ -266,6 +285,9 @@ export default function Home() {
 
   return (
     <div className={styles.container}>
+      <div>
+        <h2>タイマー: {sampleCounter}秒</h2>
+      </div>
       <button onClick={() => setBoardLevel(0)}>初級</button>
       <button onClick={() => setBoardLevel(1)}>中級</button>
       <button onClick={() => setBoardLevel(2)}>上級</button>
@@ -280,7 +302,7 @@ export default function Home() {
               key={`${y}-${x}`}
               onClick={() => clickHandler(y, x)}
               onContextMenu={(e) => handleRightClick(e, y, x)}
-              className={styles.sampleCell}
+              className={`${styles.cell} ${i === -2 ? styles.cellUnopend : styles.cellOpened}`}
               style={{ backgroundPosition: `${-30 * i}px` }}
             />
           )),
