@@ -31,10 +31,11 @@
 }
 
 .cellUnopend {
-  background-color: #eee;
-  box-shadow:
-    inset -2px -2px 2px #fff,
-    inset 2px 2px 2px #aaa;
+  background-color: #ccc;
+  border-top: 3px solid #fff;
+  border-right: 3px solid #777;
+  border-bottom: 3px solid #777;
+  border-left: 3px solid #fff;
 }
 
 /* 数字・爆弾などを表すコンテンツ表示 */

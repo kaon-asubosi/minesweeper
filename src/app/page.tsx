@@ -302,7 +302,7 @@ export default function Home() {
               key={`${y}-${x}`}
               onClick={() => clickHandler(y, x)}
               onContextMenu={(e) => handleRightClick(e, y, x)}
-              className={`${styles.cell} ${i === -2 ? styles.cellUnopend : styles.cellOpened}`}
+              className={`${styles.cell} ${i === -2 || i === 8 || i === 9 ? styles.cellUnopend : styles.cellOpened}`}
               style={{ backgroundPosition: `${-30 * i}px` }}
             />
           )),
