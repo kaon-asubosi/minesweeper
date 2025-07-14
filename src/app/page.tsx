@@ -15,7 +15,17 @@ export default function Home() {
     [1, 1],
   ];
 
-  const [userInput, setUserInput] = useState<number[][]>([]);
+  const [userInput, setUserInput] = useState<number[][]>([
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  ]);
 
   const [bombsMap, setBombsMap] = useState<number[][]>([]);
 
@@ -262,6 +272,25 @@ export default function Home() {
     return true;
   };
 
+  const calcBombs = (input: number[][], bombs: number[][]) => {
+    const countValidFlags = (input: number[][], board: number[][]): number => {
+      let count = 0;
+      for (let y = 0; y < input.length; y++) {
+        for (let x = 0; x < input[0].length; x++) {
+          if (board[y][x] === 9) {
+            count++;
+          }
+        }
+      }
+      return count;
+    };
+    if (bombs.length > 0 && bombsMap.some((row) => row.length > 0)) {
+      const displayBoard = board(input, bombs);
+      const remainingBombs = bombsNumber - countValidFlags(userInput, displayBoard);
+      return remainingBombs;
+    }
+  };
+
   const board = (input: number[][], bombs: number[][]) => {
     const rows = boardSize[0];
     const cols = boardSize[1];
@@ -301,6 +330,7 @@ export default function Home() {
   return (
     <div className={styles.container}>
       <div>
+        <h2>残りボム数:{calcBombs(userInput, bombsMap)}</h2>
         <h2>経過時間: {calcTime.time}秒</h2>
       </div>
       <button onClick={() => setBoardLevel(0)}>初級</button>
