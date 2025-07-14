@@ -19,7 +19,10 @@ export default function Home() {
 
   const [bombsMap, setBombsMap] = useState<number[][]>([]);
 
-  const [calcTime, setTime] = useState<number | null>(null);
+  const [calcTime, setTime] = useState<{ time: number; running: boolean }>({
+    time: 0,
+    running: false,
+  });
 
   const [level, setLevel] = useState<string>();
 
@@ -30,21 +33,14 @@ export default function Home() {
   const [sampleCounter, setSampleCounter] = useState(0);
 
   useEffect(() => {
-    const hasStarted = userInput.flat().includes(1);
-    const gameEnded = isGameOver(userInput, bombsMap) || isGameClear(userInput, bombsMap);
+    if (!calcTime.running) return;
 
-    let timer: NodeJS.Timeout | null = null;
+    const timer = setInterval(() => {
+      setTime((prev) => ({ ...prev, time: prev.time + 1 }));
+    }, 1000);
 
-    if (hasStarted && !gameEnded) {
-      timer = setInterval(() => {
-        setSampleCounter((prev) => prev + 1);
-      }, 1000);
-    }
-
-    return () => {
-      if (timer) clearInterval(timer);
-    };
-  }, [userInput, bombsMap]);
+    return () => clearInterval(timer);
+  }, [calcTime.running]);
 
   const setBoardLevel = (level: number) => {
     ///レベルを選択した時に起動する関数、ボードサイズを決め、セットインプットリストも起動する
@@ -65,6 +61,7 @@ export default function Home() {
     } else if (level === 3) {
       setLevel('custom');
     }
+    setTime({ time: 0, running: false });
     setBoardSize(Size);
     setInputList(Size);
     setBombsNumber(bomb);
@@ -137,6 +134,7 @@ export default function Home() {
       return;
     }
     if (!userInput.flat().includes(1)) {
+      setTime({ time: 0, running: true });
       ///1が含まれていないので初回爆弾生成後爆弾ボード所有CheckAround
       const [rows, cols] = boardSize;
       const generated = generateBombMap(rows, cols, bombsNumber, [y, x]);
@@ -153,7 +151,8 @@ export default function Home() {
     const tempInput = structuredClone(userInput);
     tempInput[y][x] = 1;
     setUserInput(tempInput);
-    if (isGameClear(tempInput, bombsMap)) {
+    callGameOver(tempInput, bombsMap);
+    if (callGameClear(tempInput, bombsMap)) {
       alert('クリア');
     }
     return;
@@ -222,6 +221,22 @@ export default function Home() {
     return result;
   };
 
+  const callGameOver = (input: number[][], bombs: number[][]): boolean => {
+    const result = isGameOver(input, bombs);
+    if (result) {
+      setTime((prev) => ({ ...prev, running: false }));
+    }
+    return result;
+  };
+
+  const callGameClear = (input: number[][], bombs: number[][]): boolean => {
+    const result = isGameClear(input, bombs);
+    if (result) {
+      setTime((prev) => ({ ...prev, running: false }));
+    }
+    return result;
+  };
+
   const isGameOver = (input: number[][], bombs: number[][]): boolean => {
     return input.some((row, y) => row.some((cell, x) => cell === 1 && bombs[y]?.[x] === 1));
   };
@@ -260,7 +275,7 @@ export default function Home() {
 
     const rawBoard = fullSearch(input, setting, bombs);
 
-    const GameOver = input.some((row, y) => row.some((cell, x) => cell === 1 && bombs[y][x] === 1));
+    const GameOver = isGameOver(input, bombs);
 
     const displayBoard: number[][] = rawBoard.map((row, y) =>
       row.map((cell, x) => {
@@ -286,7 +301,7 @@ export default function Home() {
   return (
     <div className={styles.container}>
       <div>
-        <h2>タイマー: {sampleCounter}秒</h2>
+        <h2>経過時間: {calcTime.time}秒</h2>
       </div>
       <button onClick={() => setBoardLevel(0)}>初級</button>
       <button onClick={() => setBoardLevel(1)}>中級</button>
