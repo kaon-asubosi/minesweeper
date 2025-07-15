@@ -291,6 +291,12 @@ export default function Home() {
     }
   };
 
+  const resetBoard = () => {
+    setInputList(boardSize);
+    setBombsMap([]);
+    setTime({ time: 0, running: false });
+  };
+
   const board = (input: number[][], bombs: number[][]) => {
     const rows = boardSize[0];
     const cols = boardSize[1];
@@ -331,6 +337,7 @@ export default function Home() {
     <div className={styles.container}>
       <div>
         <h2>残りボム数:{calcBombs(userInput, bombsMap)}</h2>
+        <button onClick={resetBoard}>リセット</button>
         <h2>経過時間: {calcTime.time}秒</h2>
       </div>
       <button onClick={() => setBoardLevel(0)}>初級</button>
